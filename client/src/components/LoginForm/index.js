@@ -1,17 +1,15 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { AppContext } from '../../context/AppContext';
 import { Button, Form, Input } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 
 const LoginForm = () => {
+    const { handleLogin } = useContext(AppContext)
     const [loginInfo, setLoginInfo] = useState({
-        username: "",
+        email: "",
         password: ""
     })
-
-    const handleLogin = () => {
-        console.log(loginInfo);
-    }
 
     return (
         <Form
@@ -19,10 +17,12 @@ const LoginForm = () => {
             className='form'
         >
             <Form.Item
-                name='username'
-                rules={[{ required: true, message: 'Please input your username' }]}
+                name='email'
+                rules={[
+                    { required: true, type: 'email', message: 'Please input your email' }
+                ]}
             >
-                <Input prefix={<UserOutlined />} placeholder='Username' onChange={(e) => setLoginInfo({ ...loginInfo, username: e.target.value })} />
+                <Input prefix={<UserOutlined />} placeholder='Email' onChange={(e) => setLoginInfo({ ...loginInfo, email: e.target.value })} />
             </Form.Item>
 
             <Form.Item
@@ -33,7 +33,7 @@ const LoginForm = () => {
             </Form.Item>
 
             <Form.Item>
-                <Button className='btn' type='primary' onClick={handleLogin}>
+                <Button className='btn' type='primary' onClick={() => handleLogin(loginInfo)}>
                     Log In
                 </Button>
                 {' '}Or{' '}

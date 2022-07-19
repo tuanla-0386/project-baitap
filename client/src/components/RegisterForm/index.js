@@ -1,18 +1,17 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
 import { Link } from 'react-router-dom';
+import { AppContext } from '../../context/AppContext';
 
 const RegisterForm = () => {
+    const { handleRegister } = useContext(AppContext)
     const [registerInfo, setRegisterInfo] = useState({
-        username: "",
+        name: "",
+        email: "",
         password: "",
         rePassword: ""
     })
-
-    const handleRegister = (e) => {
-        // Register ...
-    }
 
     return (
         <Form
@@ -20,10 +19,21 @@ const RegisterForm = () => {
             className='form'
         >
             <Form.Item
-                name='username'
-                rules={[{ required: true, message: 'Please input your username' }]}
+                name='name'
+                rules={[
+                    { required: true, message: 'Please input your name' }
+                ]}
             >
-                <Input prefix={<UserOutlined />} placeholder='Username' onChange={(e) => setRegisterInfo({ ...registerInfo, username: e.target.value })} />
+                <Input prefix={<UserOutlined />} placeholder='Name' onChange={(e) => setRegisterInfo({ ...registerInfo, name: e.target.value })} />
+            </Form.Item>
+
+            <Form.Item
+                name='email'
+                rules={[
+                    { required: true, type: 'email', message: 'Please input your email' }
+                ]}
+            >
+                <Input prefix={<UserOutlined />} placeholder='Email' onChange={(e) => setRegisterInfo({ ...registerInfo, email: e.target.value })} />
             </Form.Item>
 
             <Form.Item
@@ -41,7 +51,7 @@ const RegisterForm = () => {
             </Form.Item>
 
             <Form.Item>
-                <Button className='btn' type='primary' onClick={handleRegister}>
+                <Button className='btn' type='primary' onClick={() => handleRegister(registerInfo)}>
                     Register
                 </Button>
                 {' '}Or{' '}
