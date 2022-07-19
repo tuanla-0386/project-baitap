@@ -23,9 +23,10 @@ class AuthController extends Controller
         $newUser->save();
 
         return response()->json([
+            'success' => 'true',
             "message" => "Create new user successfully",
             "user" => $newUser
-        ], 200);
+        ]);
     }
 
     public function login(Request $request)
@@ -33,17 +34,19 @@ class AuthController extends Controller
         if(!Auth::attempt($request->only('email', 'password')))
         {
             return response()->json([
+                'success' => 'false',
                 'message' => "Incorrect email or password"
-            ], 400);
+            ]);
         }
 
         $user = Auth::user();
         $token = $user->createToken('token')->plainTextToken;
         return response()->json([
+            'success' => 'true',
             'message' => "Login successfully",
             'token' => $token,
             'user' => $user
-        ], 200);
+        ]);
     }
 
     public function logout(Request $request)
@@ -51,14 +54,16 @@ class AuthController extends Controller
         $request->user()->tokens()->delete();
 
         return response()->json([
+            'success' => 'true',
             'message' => "Logout successfully",
-        ], 200);
+        ]);
     }
 
     public function getCurrentUser(Request $request)
     {
         return response()->json([
+            'success' => 'true',
             'user' => $request->user()
-        ], 200);
+        ]);
     }
 }
