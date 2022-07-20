@@ -4,7 +4,7 @@ import { Button, Form, Input } from 'antd';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 
-const RegisterForm = () => {
+const RegisterForm = ({ setIsLogin }) => {
     const { handleRegister } = useContext(AppContext)
     const [registerInfo, setRegisterInfo] = useState({
         name: "",
@@ -55,9 +55,9 @@ const RegisterForm = () => {
                     Register
                 </Button>
                 {' '}Or{' '}
-                <Link to='/login'>
+                <Button onClick={() => setIsLogin(true)}>
                     Already has an account!
-                </Link>
+                </Button>
             </Form.Item>
 
         </Form>

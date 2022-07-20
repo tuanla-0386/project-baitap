@@ -1,6 +1,7 @@
-import { createContext, useEffect, useReducer } from 'react'
+import { createContext, useEffect, useReducer, useState } from 'react'
 import { checkAuth, setAuthHeader, loginAPI, registerAPI, logoutAPI } from '../api/auth'
 import { AuthReducer } from './reducer'
+import { message } from 'antd'
 
 export const AppContext = createContext()
 
@@ -11,12 +12,25 @@ const AppContextProvider = ({ children }) => {
         isAuthenticated: false,
         user: null
     })
+    const [alert, setAlert] = useState({
+        type: "",
+        message: ""
+    })
 
     const loadUser = async () => {
-        if (localStorage['token']) {
-            setAuthHeader(localStorage['token'])
+        if (!localStorage['token']) {
+            dispatch({
+                type: 'SET_AUTH',
+                payload: {
+                    ...authState,
+                    isAuthenticated: false,
+                    user: null
+                }
+            })
+            return
         }
 
+        setAuthHeader(localStorage['token'])
         dispatch({
             type: 'SETTING_AUTH',
             payload: {
@@ -52,7 +66,10 @@ const AppContextProvider = ({ children }) => {
         // validate
         const { email, password } = loginFormData
         if (!email || !password) {
-            alert("Please fill in email and password")
+            setAlert({
+                type: "warning",
+                message: "Please fill in email and password"
+            })
             return
         }
 
@@ -61,9 +78,16 @@ const AppContextProvider = ({ children }) => {
         if (responseData.success === 'true') {
             localStorage.setItem('token', responseData.token)
             await loadUser()
+            setAlert({
+                type: "success",
+                message: responseData.message
+            })
         }
         if (responseData.success === 'false') {
-            alert(responseData.message)
+            setAlert({
+                type: "error",
+                message: responseData.message
+            })
         }
     }
 
@@ -71,22 +95,55 @@ const AppContextProvider = ({ children }) => {
         //validate
         const { name, email, password, rePassword } = registerFormData
         if (!email || !password || !rePassword) {
-            alert("Please fill in email, password and confirm password")
+            setAlert({
+                type: "warning",
+                message: "Please fill in email, password and confirm password"
+            })
             return
         }
         if (password !== rePassword) {
-            alert("password and confirm password not match!")
+            setAlert({
+                type: "warning",
+                message: "Password and confirm password not match!"
+            })
             return
         }
 
+        dispatch({
+            type: 'SETTING_AUTH',
+            payload: {
+                ...authState,
+                authLoading: true
+            }
+        })
         // Call API
         const responseData = await registerAPI({ name, email, password })
         if (responseData.success === 'true') {
             localStorage.setItem('token', responseData.token)
-            await loadUser()
+            dispatch({
+                type: 'SET_AUTH',
+                payload: {
+                    ...authState,
+                    authLoading: false
+                }
+            })
+            setAlert({
+                type: "success",
+                message: responseData.message
+            })
         }
         if (responseData.success === 'false') {
-            alert(responseData.message)
+            dispatch({
+                type: 'SET_AUTH',
+                payload: {
+                    ...authState,
+                    authLoading: false
+                }
+            })
+            setAlert({
+                type: "error",
+                message: responseData.message
+            })
         }
     }
 
@@ -95,22 +152,36 @@ const AppContextProvider = ({ children }) => {
         if (responseData.success === 'true') {
             localStorage.removeItem('token')
             await loadUser()
+            setAlert({
+                type: "success",
+                message: responseData.message
+            })
         }
         if (responseData.success === 'false') {
-            alert(responseData.message)
+            setAlert({
+                type: "error",
+                message: responseData.message
+            })
         }
     }
 
+    console.log(authState);
 
     useEffect(() => loadUser(), [])
 
-    console.log(authState);
+    useEffect(() => {
+        if (alert.message) {
+            message[alert.type](alert.message)
+        }
+    }, [alert])
 
     const data = {
         handleLogin,
         handleRegister,
         handleLogout,
-        authState
+        authState,
+        loadUser,
+        alert
     }
 
     return (

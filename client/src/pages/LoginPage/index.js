@@ -1,9 +1,15 @@
-import { Outlet } from "react-router-dom"
-import { Row, Image, Space } from "antd"
+import { Row, Image } from "antd"
+import Center from "../../components/Center"
+import { useState } from "react"
+import { AppContext } from "../../context/AppContext"
+import LoginForm from "../../components/LoginForm"
+import RegisterForm from "../../components/RegisterForm"
 
-const LoginPage = () => (
-    <Row type='flex' justify='center' align='middle' style={{ minHeight: '100vh' }}>
-        <Space size={5} direction="vertical" >
+const LoginPage = () => {
+    const [isLogin, setIsLogin] = useState(true)
+
+    return (
+        <Center>
             <Row type='flex' justify='center' align='middle'>
                 <Image
                     preview={false}
@@ -11,9 +17,10 @@ const LoginPage = () => (
                     src="https://png.pngtree.com/png-vector/20190729/ourlarge/pngtree-lock-security-locked-login-business-flat-line-filled-icon-ve-png-image_1622471.jpg"
                 />
             </Row>
-            <Outlet />
-        </Space>
-    </Row>
-)
+            {isLogin && <LoginForm setIsLogin={setIsLogin} />}
+            {!isLogin && <RegisterForm setIsLogin={setIsLogin} />}
+        </Center>
+    )
+}
 
 export default LoginPage

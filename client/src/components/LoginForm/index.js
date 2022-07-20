@@ -2,10 +2,9 @@ import { useContext, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { Button, Form, Input } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
 
-const LoginForm = () => {
-    const { handleLogin } = useContext(AppContext)
+const LoginForm = ({ setIsLogin }) => {
+    const { handleLogin, alert } = useContext(AppContext)
     const [loginInfo, setLoginInfo] = useState({
         email: "",
         password: ""
@@ -37,11 +36,10 @@ const LoginForm = () => {
                     Log In
                 </Button>
                 {' '}Or{' '}
-                <Link to='/register'>
+                <Button onClick={() => setIsLogin(false)}>
                     register now!
-                </Link>
+                </Button>
             </Form.Item>
-
         </Form>
     );
 };

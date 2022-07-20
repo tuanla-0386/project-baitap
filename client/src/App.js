@@ -5,8 +5,6 @@ import {
   Route,
 } from "react-router-dom";
 import LoginPage from './pages/LoginPage';
-import LoginForm from './components/LoginForm';
-import RegisterForm from './components/RegisterForm'
 import Auth from './components/Auth';
 import RequireAuth from './components/RequireAuth';
 import ErrorPage from './pages/ErrorPage';
@@ -16,11 +14,7 @@ const App = () => (
   <BrowserRouter>
     <Routes>
       <Route path='/' element={<Auth />}>
-        <Route path='/' element={<LoginPage />} >
-          <Route index element={<LoginForm />} />
-          <Route path='/login' element={<LoginForm />} />
-          <Route path='/register' element={<RegisterForm />} />
-        </Route>
+        <Route path='/' element={<LoginPage />} />
       </Route>
       <Route path='/home' element={<RequireAuth />}>
         <Route path='/home' element={<HomePage />} />
