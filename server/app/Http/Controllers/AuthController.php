@@ -12,6 +12,14 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        $user = User::where('email', $request->input('email'))->get();
+        if(count($user)){
+            return response()->json([
+                'success' => 'false',
+                'message' => 'Email exits',
+            ]);
+        }
+
         // create new user
         $newUser = new User;
         $newUser->name = $request->input('name');
@@ -24,8 +32,8 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => 'true',
-            "message" => "Create new user successfully",
-            "user" => $newUser
+            'message' => 'Create new user successfully',
+            'user' => $newUser
         ]);
     }
 
@@ -35,7 +43,7 @@ class AuthController extends Controller
         {
             return response()->json([
                 'success' => 'false',
-                'message' => "Incorrect email or password"
+                'message' => 'Incorrect email or password'
             ]);
         }
 
@@ -43,7 +51,7 @@ class AuthController extends Controller
         $token = $user->createToken('token')->plainTextToken;
         return response()->json([
             'success' => 'true',
-            'message' => "Login successfully",
+            'message' => 'Login successfully',
             'token' => $token,
             'user' => $user
         ]);
@@ -55,7 +63,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => 'true',
-            'message' => "Logout successfully",
+            'message' => 'Logout successfully',
         ]);
     }
 
