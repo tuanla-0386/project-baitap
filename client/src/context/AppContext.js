@@ -1,51 +1,49 @@
-import { createContext, useEffect, useReducer, useState } from 'react'
+import { createContext, useContext, useEffect, useReducer } from 'react'
 import { checkAuth, setAuthHeader, loginAPI, registerAPI, logoutAPI } from '../api/auth'
 import { AuthReducer } from './reducer'
 import { message } from 'antd'
+import {
+    SET_AUTH_BEGIN,
+    SET_AUTH_SUCCESS,
+    SET_AUTH_FAILED,
+    SET_ALERT
+} from "./action"
 
-export const AppContext = createContext()
+const AppContext = createContext()
+
+const initState = {
+    isLoading: false,
+    user: null,
+    isAuthenticated: false,
+    alert_type: "",
+    alert_message: ""
+}
 
 const AppContextProvider = ({ children }) => {
 
-    const [authState, dispatch] = useReducer(AuthReducer, {
-        authLoading: true,
-        isAuthenticated: false,
-        user: null
-    })
-    const [alert, setAlert] = useState({
-        type: "",
-        message: ""
-    })
+    const [authState, dispatch] = useReducer(AuthReducer, initState)
 
     const loadUser = async () => {
         if (!localStorage['token']) {
             dispatch({
-                type: 'SET_AUTH',
-                payload: {
-                    ...authState,
-                    isAuthenticated: false,
-                    user: null
-                }
+                type: SET_AUTH_FAILED
             })
             return
         }
 
         setAuthHeader(localStorage['token'])
         dispatch({
-            type: 'SETTING_AUTH',
-            payload: {
-                isAuthenticated: false,
-                user: null
-            }
+            type: SET_AUTH_BEGIN
         })
 
         const responseData = await checkAuth()
         if (responseData.success === 'true') {
             dispatch({
-                type: 'SET_AUTH',
+                type: SET_AUTH_SUCCESS,
                 payload: {
-                    isAuthenticated: true,
-                    user: responseData.user
+                    user: responseData.user,
+                    alert_type: "success",
+                    alert_message: "Login successfully"
                 }
             })
         }
@@ -53,40 +51,47 @@ const AppContextProvider = ({ children }) => {
             localStorage.removeItem('token')
             setAuthHeader(null)
             dispatch({
-                type: 'SET_AUTH',
-                payload: {
-                    isAuthenticated: false,
-                    user: null
-                }
+                type: SET_AUTH_FAILED
             })
         }
     }
-
     const handleLogin = async (loginFormData) => {
         // validate
         const { email, password } = loginFormData
         if (!email || !password) {
-            setAlert({
-                type: "warning",
-                message: "Please fill in email and password"
+            dispatch({
+                type: SET_ALERT,
+                payload: {
+                    alert_type: "waring",
+                    alert_message: "Please fill in email and password"
+                }
             })
             return
         }
-
+        dispatch({
+            type: SET_AUTH_BEGIN
+        })
         // Call API
         const responseData = await loginAPI(loginFormData)
         if (responseData.success === 'true') {
             localStorage.setItem('token', responseData.token)
-            await loadUser()
-            setAlert({
-                type: "success",
-                message: responseData.message
+            setAuthHeader(localStorage['token'])
+            dispatch({
+                type: SET_AUTH_SUCCESS,
+                payload: {
+                    user: responseData.user,
+                    alert_type: "success",
+                    alert_message: responseData.message
+                }
             })
         }
         if (responseData.success === 'false') {
-            setAlert({
-                type: "error",
-                message: responseData.message
+            dispatch({
+                type: SET_AUTH_FAILED,
+                payload: {
+                    alert_type: "error",
+                    alert_message: responseData.message
+                }
             })
         }
     }
@@ -95,74 +100,67 @@ const AppContextProvider = ({ children }) => {
         //validate
         const { name, email, password, rePassword } = registerFormData
         if (!email || !password || !rePassword) {
-            setAlert({
-                type: "warning",
-                message: "Please fill in email, password and confirm password"
+            dispatch({
+                type: SET_ALERT,
+                payload: {
+                    alert_type: "warning",
+                    alert_message: "Please fill in email, password and confirm password"
+                }
             })
             return
         }
         if (password !== rePassword) {
-            setAlert({
-                type: "warning",
-                message: "Password and confirm password not match!"
+            dispatch({
+                type: SET_ALERT,
+                payload: {
+                    alert_type: "warning",
+                    alert_message: "Password and confirm password not match!"
+                }
             })
             return
         }
 
         dispatch({
-            type: 'SETTING_AUTH',
-            payload: {
-                ...authState,
-                authLoading: true
-            }
+            type: SET_AUTH_BEGIN
         })
         // Call API
         const responseData = await registerAPI({ name, email, password })
         if (responseData.success === 'true') {
-            localStorage.setItem('token', responseData.token)
             dispatch({
-                type: 'SET_AUTH',
+                type: SET_ALERT,
                 payload: {
-                    ...authState,
-                    authLoading: false
+                    alert_type: "success",
+                    alert_message: responseData.message
                 }
-            })
-            setAlert({
-                type: "success",
-                message: responseData.message
             })
         }
         if (responseData.success === 'false') {
             dispatch({
-                type: 'SET_AUTH',
+                type: SET_ALERT,
                 payload: {
-                    ...authState,
-                    authLoading: false
+                    alert_type: "error",
+                    alert_message: responseData.message
                 }
             })
-            setAlert({
-                type: "error",
-                message: responseData.message
-            })
         }
+        dispatch({
+            type: SET_AUTH_FAILED
+        })
     }
 
     const handleLogout = async () => {
+        dispatch({
+            type: SET_AUTH_BEGIN
+        })
         const responseData = await logoutAPI()
-        if (responseData.success === 'true') {
-            localStorage.removeItem('token')
-            await loadUser()
-            setAlert({
-                type: "success",
-                message: responseData.message
-            })
-        }
-        if (responseData.success === 'false') {
-            setAlert({
-                type: "error",
-                message: responseData.message
-            })
-        }
+        localStorage.removeItem('token')
+        dispatch({
+            type: SET_AUTH_FAILED,
+            payload: {
+                alert_type: "success",
+                alert_message: responseData.message
+            }
+        })
     }
 
     console.log(authState);
@@ -170,18 +168,24 @@ const AppContextProvider = ({ children }) => {
     useEffect(() => loadUser(), [])
 
     useEffect(() => {
-        if (alert.message) {
-            message[alert.type](alert.message)
+        if (authState.alert_message) {
+            message[authState.alert_type](authState.alert_message)
+            dispatch({
+                type: SET_ALERT,
+                payload: {
+                    alert_type: "",
+                    alert_message: ""
+                }
+            })
         }
-    }, [alert])
+    }, [authState])
 
     const data = {
         handleLogin,
         handleRegister,
         handleLogout,
         authState,
-        loadUser,
-        alert
+        loadUser
     }
 
     return (
@@ -191,4 +195,10 @@ const AppContextProvider = ({ children }) => {
     )
 }
 
+const useAppContext = () => {
+    return useContext(AppContext)
+}
+
 export default AppContextProvider
+
+export { AppContext, useAppContext }

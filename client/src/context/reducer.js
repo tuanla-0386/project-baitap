@@ -1,22 +1,39 @@
-export const AuthReducer = (state, action) => {
-    const { type, payload: { isAuthenticated, user } } = action
+import {
+    SET_AUTH_BEGIN,
+    SET_AUTH_SUCCESS,
+    SET_AUTH_FAILED,
+    SET_ALERT
+} from "./action"
 
-    switch (type) {
-        case 'SET_AUTH':
+export const AuthReducer = (state, action) => {
+
+    switch (action.type) {
+        case SET_AUTH_BEGIN:
             return {
                 ...state,
-                authLoading: false,
-                isAuthenticated,
-                user
+                isLoading: true
             }
-        case 'SETTING_AUTH':
+        case SET_AUTH_FAILED:
             return {
                 ...state,
-                authLoading: true,
-                isAuthenticated,
-                user
+                isLoading: false,
+                user: null,
+                isAuthenticated: false,
+                ...action.payload
+            }
+        case SET_AUTH_SUCCESS:
+            return {
+                ...state,
+                isLoading: false,
+                isAuthenticated: true,
+                ...action.payload
+            }
+        case SET_ALERT:
+            return {
+                ...state,
+                ...action.payload
             }
         default:
-            return state
+            throw new Error("Action not match")
     }
 }

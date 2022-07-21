@@ -1,9 +1,8 @@
 import { Button } from 'antd'
-import { useContext } from 'react'
-import { AppContext } from '../../context/AppContext'
+import { useAppContext } from '../../context/AppContext'
 
 const HomePage = () => {
-    const { handleLogout } = useContext(AppContext)
+    const { handleLogout } = useAppContext()
 
     return (
         <div>

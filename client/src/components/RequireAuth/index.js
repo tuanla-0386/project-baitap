@@ -1,18 +1,17 @@
-import { useContext } from "react"
-import { AppContext } from "../../context/AppContext"
 import { Spin } from "antd"
 import { useNavigate, Outlet } from "react-router-dom"
-import Center from '../../components/Center'
+import { useAppContext } from "../../context/AppContext"
 
 const RequireAuth = () => {
-    const { authState: { authLoading, isAuthenticated } } = useContext(AppContext)
+
+    const { authState: { isLoading, isAuthenticated } } = useAppContext()
     const navigate = useNavigate()
     let body
-    if (authLoading) {
+    if (isLoading) {
         body =
-            <Center>
-                <Spin size="large" tip='Loading...' />
-            </Center>
+            <Spin tip="Loading...">
+                <Outlet />
+            </Spin>
     } else if (isAuthenticated) {
         body = <Outlet />
     } else {

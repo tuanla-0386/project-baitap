@@ -1,18 +1,18 @@
-import { useContext, useEffect } from "react"
-import { AppContext } from "../../context/AppContext"
+import { useEffect } from "react"
+import { useAppContext } from "../../context/AppContext"
 import { Spin } from "antd"
 import { useNavigate, Outlet } from "react-router-dom"
-import Center from '../../components/Center'
 
 const Auth = () => {
-    const { authState: { authLoading, isAuthenticated } } = useContext(AppContext)
+    console.log("Auth");
+
+    const { authState: { isLoading, isAuthenticated } } = useAppContext()
     const navigate = useNavigate()
     let body
-    if (authLoading) {
-        body =
-            <Center>
-                <Spin size="large" tip='Loading...' />
-            </Center>
+    if (isLoading) {
+        body = <Spin tip="Loading...">
+            <Outlet />
+        </Spin>
     } else if (isAuthenticated) {
         navigate('/home', { replace: true })
     } else {
