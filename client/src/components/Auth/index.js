@@ -1,29 +1,25 @@
 import { useEffect } from "react"
 import { useAppContext } from "../../context/AppContext"
 import { Spin } from "antd"
-import { useNavigate, Outlet } from "react-router-dom"
+import { Outlet, Navigate } from "react-router-dom"
 
 const Auth = () => {
     console.log("Auth");
 
     const { authState: { isLoading, isAuthenticated } } = useAppContext()
-    const navigate = useNavigate()
     let body
-    if (isLoading) {
-        body = <Spin tip="Loading...">
-            <Outlet />
-        </Spin>
-    } else if (isAuthenticated) {
-        navigate('/home', { replace: true })
-    } else {
-        body = <Outlet />
-    }
 
-    useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/home', { replace: true })
-        }
-    }, [])
+    if (isLoading) {
+        body = (
+            <Spin tip="Loading..."></Spin>
+        )
+    } else if (!isAuthenticated) {
+        body = (
+            <Outlet />
+        )
+    } else {
+        body = <Navigate to='/home' />
+    }
 
 
     return (

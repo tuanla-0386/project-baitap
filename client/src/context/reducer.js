@@ -2,8 +2,11 @@ import {
     SET_AUTH_BEGIN,
     SET_AUTH_SUCCESS,
     SET_AUTH_FAILED,
-    SET_ALERT
+    SET_USER_LIST,
+    SET_USER_UPDATE,
+    SET_USER_DELETE
 } from "./action"
+import { initState } from "./AppContext"
 
 export const AuthReducer = (state, action) => {
 
@@ -15,11 +18,7 @@ export const AuthReducer = (state, action) => {
             }
         case SET_AUTH_FAILED:
             return {
-                ...state,
-                isLoading: false,
-                user: null,
-                isAuthenticated: false,
-                ...action.payload
+                ...initState
             }
         case SET_AUTH_SUCCESS:
             return {
@@ -28,10 +27,28 @@ export const AuthReducer = (state, action) => {
                 isAuthenticated: true,
                 ...action.payload
             }
-        case SET_ALERT:
+        case SET_USER_LIST:
             return {
                 ...state,
-                ...action.payload
+                listUser: action.payload.users
+            }
+        case SET_USER_UPDATE:
+            return {
+                ...state,
+                listUser: state.listUser.map((item) => {
+                    if (item.id === action.payload.id) {
+                        return {
+                            ...item,
+                            ...action.payload
+                        }
+                    }
+                    return item
+                })
+            }
+        case SET_USER_DELETE:
+            return {
+                ...state,
+                listUser: state.listUser.filter((item) => item.id !== action.payload.id)
             }
         default:
             throw new Error("Action not match")

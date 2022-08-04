@@ -1,0 +1,17 @@
+.card {
+  width: fit-content;
+  min-width: 400px;
+  height: fit-content;
+  min-height: 200px;
+  padding: 20px;
+  border: 1px solid gray;
+  display: flex;
+  justify-content: space-around;
+}
+
+.card-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 2px solid gray;
+}

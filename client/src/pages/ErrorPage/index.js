@@ -18,7 +18,7 @@ const ErrorPage = () => {
                 </Row>
                 <Row type='flex' justify='center' align='middle'>
                     <Button onClick={() => navigate(-1)}>
-                        Back to home!
+                        Back!
                     </Button>
                 </Row>
             </Col >
